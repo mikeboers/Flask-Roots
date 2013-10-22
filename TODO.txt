@@ -1,4 +1,25 @@
 
+- `manage install` to setup service and nginx
+  - INSTANCE_ID in etc/flask
+
+- request.environ in tracebacks and emails
+
+- merge DOMAIN and DOMAINS into single list of domains.
+    - maybe VIRTUAL_HOSTS, DOMAIN_NAMES, or DOMAINS.
+
+- take a look at how heroku buildpacks work, and see if we can have
+  some sort of automated deployment
+    - relocatable venvs?
+    - would need another later in the folder structure that the builder
+      manages: /srv/mikeboers.com/www/stage-8025 (for port 8025)
+      - includes a full clone, copies of all the static assets, clone
+        of the virtualenv, random-ish port
+
+- pull in form rendering from Spoon
+
+- make Flask-WTCrud which pulls WTForms via ajax and displays them in
+  a bootstrap dialog
+
 - gem/node commands
 
 - replace baker with argparse in manage and migrate
