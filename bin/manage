@@ -266,12 +266,18 @@ def kill(*names, **kwargs):
 
 
 @command
-def serve(debug=True, watch=True):
+def serve(service=False, nodebug=False, watch=True, test=False):
 
-    if debug:
+    # HACK!
+    if test:
+        os.environ['FLASK_TESTING'] = '1'
+    if not nodebug:
+        os.environ['FLASK_DEBUG'] = '1'
+
+    if not service:
+
         app = get_app()
         app.run(
-            debug=True,
             use_reloader=watch,
             port=app.config.get('PORT', 8000),
         )
