@@ -269,7 +269,7 @@ def serve(debug=True, watch=True):
         app.run(
             debug=True,
             use_reloader=watch,
-            port=app.config['PORT'],
+            port=app.config.get('PORT', 8000),
         )
 
     else:
