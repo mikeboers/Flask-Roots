@@ -1,3 +1,6 @@
+import re
+import unicodedata
+
 from werkzeug.routing import BaseConverter
 
 
