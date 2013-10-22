@@ -14,14 +14,15 @@ try:
 except ImportError:
     from flask import _request_ctx_stack as stack
 
-from flask.ext.mako import MakoTemplates as Base, _render, Template
 from flask import g, current_app
+from flask.signals import template_rendered
+from flask.ext.mako import MakoTemplates as Base, Template, TemplateError
+
 import mako
 import haml
 from markupsafe import Markup
 
 from .markdown import markdown
-
 
 
 def unicode_safe(x):
@@ -70,6 +71,18 @@ def _lookup(app):
     if not app._mako_lookup:
         app._mako_lookup = MakoTemplates.create_lookup(app)
     return app._mako_lookup
+
+
+def _render(template, context, app):
+    """Renders the template and fires the signal"""
+    app.update_template_context(context)
+    try:
+        rv = template.render_unicode(**context)
+        template_rendered.send(app, template=template, context=context)
+        return rv
+    except:
+        translated = TemplateError(template)
+        raise translated
 
 
 def render_template(template_name, **context):
