@@ -156,6 +156,10 @@ def js(watch=False):
     out_path = os.path.join(instance_path, 'static', 'js')
     makedirs(out_path)
 
+    if not os.path.exists('js'):
+        print 'No Javascript'
+        return
+    
     from jsmin import jsmin
     for name in os.listdir('js'):
 
