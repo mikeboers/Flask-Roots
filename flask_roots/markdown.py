@@ -21,6 +21,7 @@ filter itself.)
 
 """
 
+
 from __future__ import absolute_import
 
 import os
@@ -28,14 +29,49 @@ import logging
 import re
 import cgi
 
-from markdown import Markdown
-from markdown.extensions.codehilite import CodeHilite, CodeHiliteExtension
-
+import markdown as _markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 log = logging.getLogger(__name__)
+
+
+class MathJaxExtension(_markdown.Extension):
+    
+    class Preprocessor(_markdown.preprocessors.Preprocessor):
+         
+        _pattern = re.compile(r'\\\[(.+?)\\\]|\\\((.+?)\\\)', re.MULTILINE | re.DOTALL)
+
+        def _callback(self, m):
+            return self.markdown.htmlStash.store(cgi.escape(m.group(0)), safe=True)
+        
+        def run(self, lines):
+            """Parses the actual page"""
+            return self._pattern.sub(self._callback, '\n'.join(lines)).splitlines() + ['']
+        
+    def extendMarkdown(self, md, md_globals):
+        md.preprocessors.add('mathjax', self.Preprocessor(md), '<html_block')
+
+
+class MarkdownEscapeExtension(_markdown.Extension):
+    
+    class Preprocessor(_markdown.preprocessors.Preprocessor):
+         
+        _pattern = re.compile(r'<nomarkdown>(.+?)</nomarkdown>', re.MULTILINE | re.DOTALL)
+
+        def _callback(self, m):
+            return self.markdown.htmlStash.store(m.group(1), safe=True)
+        
+        def run(self, lines):
+            """Parses the actual page"""
+            return self._pattern.sub(self._callback, '\n'.join(lines)).splitlines() + ['']
+        
+    def extendMarkdown(self, md, md_globals):
+        md.preprocessors.add('markdown_escape', self.Preprocessor(md), '<html_block')
         
 
 extension_constructors = dict(
+    mathjax=MathJaxExtension,
+    markdown_escape=MarkdownEscapeExtension,
     codehilite=lambda: CodeHiliteExtension([('guess_lang', False)])
 )
 
@@ -43,6 +79,8 @@ extension_constructors = dict(
 extension_usage_defaults = dict(
     nl2br=True,
     codehilite=True,
+    mathjax=True,
+    markdown_escape=False,
     abbr=True,
     footnotes=True,
     fenced_code=True,
@@ -50,7 +88,8 @@ extension_usage_defaults = dict(
 
 
 def markdown(text, _unknown=None, **custom_exts):
-    
+    # _unknown is for swisssol.com. It may have been nl2br.
+
     if not isinstance(text, unicode):
         text = unicode(str(text), 'utf8')
     
@@ -63,8 +102,9 @@ def markdown(text, _unknown=None, **custom_exts):
             ext = ext() if ext else name
             loaded_extensions.append(ext)
         
-    md = Markdown(extensions=loaded_extensions,
+    md = _markdown.Markdown(extensions=loaded_extensions,
                   safe_mode=False, 
                   output_format='xhtml')
     return md.convert(text)
     
+
