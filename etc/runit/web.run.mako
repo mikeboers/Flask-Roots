@@ -4,8 +4,6 @@ ROOT_PATH="${ROOT_PATH}"
 INSTANCE_PATH="${INSTANCE_PATH}"
 SELF="${'${BASH_SOURCE[0]}'}"
 
-cd "$ROOT_PATH"
-
 # Get the owner of the `run` command. We are using Python since `stat` did not
 # present a consistent interface on Linux and OS X.
 if [[ $(id -u) == "0" ]]; then
@@ -25,6 +23,8 @@ if [[ $(id -u) == "0" ]]; then
 fi
 
 . "${ROOT_PATH}/bin/activate"
+
+cd "$ROOT_PATH"
 
 exec 2>&1
 exec $PRELUDE gunicorn \
