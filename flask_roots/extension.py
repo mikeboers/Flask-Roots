@@ -4,7 +4,7 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.images import Images
-# from flask.ext.mail import Mail
+from flask.ext.mail import Mail
 from flask.ext.login import LoginManager
 from flask.ext.acl import AuthManager
 
@@ -32,7 +32,9 @@ class Roots(object):
         from .session import setup_session
         setup_session(app)
 
-        self.extensions['login_manager'] = LoginManager(app)
+        self.extensions['login_manager'] = login = LoginManager(app)
+        login.user_callback = lambda uid: None
+
         self.extensions['auth'] = AuthManager(app)
 
         from .mako import MakoTemplates
@@ -42,6 +44,8 @@ class Roots(object):
 
         self.extensions['db'] = db = SQLAlchemy(app)
         db.metadata.bind = db.engine # WTF do I need to do this for?!
+
+        self.extensions['mail'] = Mail(app)
 
         from .routing import setup_routing
         setup_routing(app)
