@@ -20,7 +20,7 @@ then
 
     # Create it.
     mkdir -p "$VIRTUAL_ENV"
-    "$APP_BIN/virtualenv" --no-site-packages --distribute "$VIRTUAL_ENV"
+    python2.7 "$APP_BIN/virtualenv" --no-site-packages --distribute "$VIRTUAL_ENV"
 fi
 . "$VIRTUAL_ENV/bin/activate"
 
