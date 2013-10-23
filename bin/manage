@@ -131,13 +131,34 @@ def permissions(verbose=False):
 
 
 @command
-def css(watch=False):
+def css(watch=False, create=False):
+
+    if create:
+        if os.path.exists('css/config.rb'):
+            os.unlink('css/config.rb')
+        call(['compass', 'create',
+            '--prepare',
+            '--sass-dir', '.',
+            '--css-dir', '../var/static/css',
+            'css'
+        ])
+        return
+
     if watch:
-        try:
-            call(['compass', 'watch', os.path.join(root_path, 'css'), '--output-style', 'nested', '--force'])
-        except KeyboardInterrupt: pass
+        cmd = ['compass', 'watch', '--output-style', 'nested']
     else:
-        call(['compass', 'compile', os.path.join(root_path, 'css'), '--output-style', 'compressed', '--force'])
+        cmd = ['compass', 'compile', '--output-style', 'compressed']
+
+    cmd.extend((
+        '--force',
+        'css',
+    ))
+
+    try:
+        print ' '.join(cmd)
+        call(cmd)
+    except KeyboardInterrupt:
+        pass
 
 
 @command
