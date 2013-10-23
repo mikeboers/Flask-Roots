@@ -280,6 +280,7 @@ def serve(service=False, nodebug=False, watch=True, test=False):
         app.run(
             use_reloader=watch,
             port=app.config.get('PORT', 8000),
+            debug=not nodebug,
         )
 
     else:
