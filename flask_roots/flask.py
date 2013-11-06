@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 
-from flask import Flask as _Base
+from flask import Flask as _Base, abort
 from flask.helpers import send_from_directory
 
 
@@ -22,8 +22,11 @@ class Flask(_Base):
         for dir_name in 'static', 'var/static':
             dir_path = os.path.join(self.root_path, dir_name)
             file_path = os.path.join(dir_path, filename)
-            if os.path.exists(file_path):
-                break
+            try:
+                if os.path.exists(file_path):
+                    break
+            except UnicodeError:
+                abort(404)
         
         return send_from_directory(dir_path, filename,
                                    cache_timeout=cache_timeout)

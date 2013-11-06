@@ -42,7 +42,7 @@ def setup_logs(app):
 
         http_access_logger.info('%(method)s %(path)s -> %(status)s in %(duration).1fms' % {
             'method': request.method,
-            'path': quote(request.path),
+            'path': quote(request.path.encode('utf8')),
             'status': response.status_code,
             'duration': 1000 * (time.time() - g.log_start_time),
         } + ('; ' if meta else '') + ' '.join('%s=%s' % x for x in sorted(meta.iteritems())))
