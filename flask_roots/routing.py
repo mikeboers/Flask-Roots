@@ -34,9 +34,9 @@ class NameConverter(BaseConverter):
         return value
 
     def to_url(self, value):
-        if not isinstance(value, str) and hasattr(value, 'name'):
+        if not isinstance(value, basestring) and hasattr(value, 'name'):
             value = value.name
-        return urlify_name(str(value)).lower()
+        return urlify_name(value).lower()
 
 
 def setup_routing(app):
