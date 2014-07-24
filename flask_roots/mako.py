@@ -6,19 +6,11 @@ import hashlib
 import os
 import re
 
-# Find the stack on which we want to store the database connection.
-# Starting with Flask 0.9, the _app_ctx_stack is the correct one,
-# before that we need to use the _request_ctx_stack.
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:
-    from flask import _request_ctx_stack as stack
 
 from flask import g, current_app
-from flask.signals import template_rendered
-from flask.ext.mako import MakoTemplates as Base, Template, TemplateError
+from flask.ext.mako import MakoTemplates as Base, render_template, render_template_string, render_template_def
 
-import mako
+import mako.template
 import haml
 from markupsafe import Markup
 
@@ -29,18 +21,25 @@ def unicode_safe(x):
     return x if isinstance(x, Markup) else unicode(x)
 
 
+# Monkey patch for error catching!
+def def_template_uri(self):
+    return self.parent.uri + '#' + self.callable_.__name__
+mako.template.DefTemplate.uri = property(def_template_uri)
+
+
 class MakoTemplates(Base):
 
     def __init__(self, *args, **kwargs):
         super(MakoTemplates, self).__init__(*args, **kwargs)
 
     def init_app(self, app):
-
         app.config.setdefault('MAKO_IMPORTS', []).append(
             'from %s import unicode_safe' % __name__
         )
         super(MakoTemplates, self).init_app(app)
         app.context_processor(self.process_context)
+        # Force it to create the lookup now.
+        app._mako_lookup = self.create_lookup(app)
 
     @staticmethod
     def create_lookup(app):
@@ -67,62 +66,15 @@ class MakoTemplates(Base):
         )
 
 
-def _lookup(app):
-    if not app._mako_lookup:
-        app._mako_lookup = MakoTemplates.create_lookup(app)
-    return app._mako_lookup
-
-
-def _render(template, context, app):
-    """Renders the template and fires the signal"""
-    app.update_template_context(context)
-    try:
-        rv = template.render_unicode(**context)
-        template_rendered.send(app, template=template, context=context)
-        return rv
-    except:
-        translated = TemplateError(template)
-        raise translated
-
-
-def render_template(template_name, **context):
-    """Renders a template from the template folder with the given
-    context.
-
-    :param template_name: the name of the template to be rendered
-    :param context: the variables that should be available in the
-                    context of the template.
-    """
-    ctx = stack.top
-    return _render(_lookup(ctx.app).get_template(template_name),
-                   context, ctx.app)
-
-def render_template_string(source, **context):
-    """Renders a template from the given template source string
-    with the given context.
-
-    :param source: the sourcecode of the template to be
-                          rendered
-    :param context: the variables that should be available in the
-                    context of the template.
-    """
-    ctx = stack.top
-    lookup = _lookup(ctx.app)
-    template = Template(source, lookup=_lookup(ctx.app), **lookup.template_args)
-    return _render(template, context, ctx.app)
-
-
 _static_etags = {}
 
 def static(file_name):
-
-    app = stack.top.app
 
     file_name = file_name.strip('/')
 
     # Serve out of 'static' and 'var/static'.
     for dir_name in 'static', 'var/static':
-        file_path = os.path.join(app.root_path, dir_name, file_name)
+        file_path = os.path.join(current_app.root_path, dir_name, file_name)
         if os.path.exists(file_path):
             mtime = os.path.getmtime(file_path)
             if file_path not in _static_etags or _static_etags[file_path][0] != mtime:

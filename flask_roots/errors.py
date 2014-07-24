@@ -58,6 +58,10 @@ def setup_errors(app):
             ), 500
         except KeyError:
             return InternalServerError()
+        except TemplateError as e2:
+            text = e2.text.strip()
+            log.error('Exception during error template rendering\n' + text)
+        return e
 
 
     # Standard exceptions.
@@ -72,5 +76,9 @@ def setup_errors(app):
             ), 500
         except KeyError:
             return InternalServerError()
+        except TemplateError as e2:
+            text = e2.text.strip()
+            log.error('Exception during error template rendering\n' + text)
+        return e
             
 
