@@ -48,7 +48,15 @@ class MakoTemplates(Base):
 
     @staticmethod
     def create_lookup(app):
-        lookup = Base.create_lookup(app)
+
+        if hasattr(Base, 'create_lookup'):
+            # Flask-Mako==0.2
+            lookup = Base.create_lookup(app)
+        else:
+            # Flask-Mako>=0.3
+            from flask.ext.mako import _create_lookup
+            lookup = _create_lookup(app)
+
         lookup.default_filters = ['unicode_safe']
         
         get_template = lookup.get_template
