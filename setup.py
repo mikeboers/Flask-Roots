@@ -34,7 +34,7 @@ setup(
 
         Flask-Mail
         
-        PIL
+        pillowcase
         Flask-Images
 
         Flask-Login
