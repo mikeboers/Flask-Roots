@@ -5,7 +5,7 @@ import os
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.images import Images
 from flask.ext.login import LoginManager
-from flask.ext.acl import AuthManager
+from flask.ext.acl import ACLManager
 
 
 class Roots(object):
@@ -33,7 +33,7 @@ class Roots(object):
         self.extensions['login_manager'] = login = LoginManager(app)
         login.user_callback = lambda uid: None
 
-        self.extensions['auth'] = AuthManager(app)
+        self.extensions['auth'] = ACLManager(app)
 
         from .mako import MakoTemplates
         self.extensions['mako'] = MakoTemplates(app)
