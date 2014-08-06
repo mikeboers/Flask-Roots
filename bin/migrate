@@ -4,6 +4,9 @@ import datetime
 import errno
 import os
 import sys
+import urlparse
+import datetime
+import shutil
 from optparse import OptionParser
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, DateTime, String
@@ -16,11 +19,28 @@ opt_parser = OptionParser()
 opt_parser.add_option('-v', '--verbose', action='store_true')
 opt_parser.add_option('-n', '--dry-run', action='store_true')
 opt_parser.add_option('-e', '--echo', action='store_true')
+opt_parser.add_option('--no-backup', action='store_true')
 opts, args = opt_parser.parse_args()
 
 
 config = get_config()
 root_path = config['ROOT_PATH']
+
+
+if not opts.no_backup:
+    split = urlparse.urlsplit(config['SQLALCHEMY_DATABASE_URI'])
+    if split.scheme == 'sqlite':
+        dbpath = split.path
+        if dbpath.startswith('/'):
+            dbpath = dbpath[1:]
+        backups = os.path.join(os.path.dirname(dbpath), 'backups')
+        if not os.path.exists(backups):
+            os.makedirs(backups)
+        backup = os.path.join(
+            backups,
+            os.path.basename(dbpath) + '.' + datetime.datetime.utcnow().replace(microsecond=0).isoformat('T')
+        )
+        shutil.copy(dbpath, backup)
 
 
 # Setup out migration tracking table.
