@@ -86,8 +86,8 @@ def static(file_name):
 
 
 def fuzzy_time(d, now=None):
-    if isinstance(d, (int, long)):
-        d = datetime.datetime.fromtimestamp(d)
+    if isinstance(d, (int, long, float)):
+        d = datetime.datetime.fromtimestamp(int(d))
     now = now or datetime.datetime.utcnow()
     diff = now - d
     s = diff.seconds + diff.days * 24 * 3600
