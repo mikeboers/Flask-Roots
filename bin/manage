@@ -287,6 +287,14 @@ def kill(*names, **kwargs):
 
 
 @command
+def sv(command, *names):
+    for service in iter_services(*names):
+        cmd = ['sv', command, service]
+        print ' '.join(cmd)
+        call(cmd)
+
+
+@command
 def serve(service=False, debug=None, watch=True, testing=None):
 
     # HACK!
