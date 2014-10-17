@@ -172,6 +172,7 @@ def js(watch=False):
             '--command', 'date; manage js',
             '--recursive',
             'js',
+            'lib',
         ])
 
     out_path = os.path.join(instance_path, 'static', 'js')
@@ -194,6 +195,7 @@ def js(watch=False):
             '--include', 'js',
             '--include', 'js/include',
             '--include', 'js/vendor',
+            '--include', 'lib',
             '--include', os.path.join(os.environ['VIRTUAL_ENV'], 'lib', 'bower'),
             os.path.join('js', name + '.js'),
         ])
