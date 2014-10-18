@@ -5,6 +5,7 @@ import grp
 import os
 import pwd
 import signal
+import threading
 from subprocess import Popen, call, check_output, CalledProcessError, PIPE
 
 try:
@@ -167,13 +168,14 @@ def js(watch=False):
     if watch:
         js()
         print 'watching for changes...'
-        os.execvp('watchmedo', ['watchmedo', 'shell-command',
+        call(['watchmedo', 'shell-command',
             '--patterns', '*.js',
             '--command', 'date; manage js',
             '--recursive',
             'js',
             'lib',
         ])
+        return
 
     out_path = os.path.join(instance_path, 'static', 'js')
     makedirs(out_path)
@@ -297,15 +299,27 @@ def sv(command, *names):
 
 
 @command
-def serve(service=False, debug=None, watch=True, testing=None):
+def serve(sv=False, watch=True, debug=None, testing=None, dev=None, js=None, css=None):
+
+    debug = debug or dev
+    testing = testing or dev
+    js = js or dev
+    css = css or dev
 
     # HACK!
     if testing is not None:
-        os.environ['FLASK_TESTING'] = '1' if test else ''
+        os.environ['FLASK_TESTING'] = '1' if testing else ''
     if debug is not None:
         os.environ['FLASK_DEBUG'] = '1' if debug else ''
 
-    if not service:
+    if js:
+        js = threading.Thread(target=lambda: globals()['js'](watch=True))
+        js.start()
+    if css:
+        css = threading.Thread(target=lambda: globals()['css'](watch=True))
+        css.start()
+
+    if not sv:
 
         app = get_app()
         app.run(
