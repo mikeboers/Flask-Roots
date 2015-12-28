@@ -8,10 +8,13 @@ import sys
 import time
 from urllib import quote
 
-from flask import request, g
+from flask import request, g, Response
 
 
 http_access_logger = logging.getLogger('http.access')
+
+
+WHITE_PIXEL = 'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='.decode('base64')
 
 
 def setup_logs(app):
@@ -22,6 +25,37 @@ def setup_logs(app):
         g.log_request_counter = next(_request_counter)
         g.log_start_time = time.time()
 
+    @app.route('/_uuid.gif')
+    def uuid_pixel():
+
+        etags = request.if_none_match.as_set()
+        etag = list(etags)[0] if etags else None
+
+        uuid = request.cookies.get('uuid')
+
+        res = Response(WHITE_PIXEL, mimetype='image/gif')
+
+        if etag and (not uuid or etag != uuid):
+
+            if uuid:
+                http_access_logger.info('uuid migrated from %s to %s' % (etag, uuid))
+                res.headers.add('Etag', uuid)
+            else:
+                http_access_logger.info('uuid restored to %s' % etag)
+                res.set_cookie('uuid', etag, max_age=3600*24*365*20)
+
+        if uuid and not etag:
+            res.headers.add('Etag', uuid)
+
+        if not request.cookies.get('uuid_validated'):
+            res.set_cookie('uuid_validated', '1')
+
+        res.expires = time.time() + 3600
+        res.cache_control.private = True
+        res.cache_control.must_revalidate = True
+        res.cache_control.max_age = 0
+
+        return res
 
     @app.after_request
     def log_request(response):

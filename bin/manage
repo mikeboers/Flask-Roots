@@ -302,9 +302,10 @@ def sv(command, *names):
 def serve(sv=False, watch=True, debug=None, testing=None, dev=None, js=None, css=None):
 
     debug = debug or dev
-    testing = testing or dev
+    # testing = testing or dev
     js = js or dev
     css = css or dev
+    watch = watch or dev
 
     # HACK!
     if testing is not None:
