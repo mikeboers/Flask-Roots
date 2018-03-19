@@ -4,13 +4,14 @@
 def init_flask_login(app):
     from flask_login import LoginManager
     login_mananger = LoginManager(app)
-    app.roots['login_mananger'] = login_mananger
+    app.roots['login_mananger'] = login_mananger # Old name.
+    app.roots['authn'] = login_mananger # New name.
     login.user_callback = lambda uid: None # TODO: Why?
 
 
 def init_flask_acl(app):
-    from flask_acl import AuthManager
-    authz = AuthManager(app)
+    from flask_acl import ACLManager
+    authz = ACLManager(app)
     app.roots['auth'] = authz # Old name.
     app.roots['authz'] = authz # New name.
 
