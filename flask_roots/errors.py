@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 DummyStatus = collections.namedtuple('DummyStatus', 'code name description')
 
 
-def setup_errors(app):
+def init_error_templates(app):
 
     # Take over all formatting of HTTP status codes by replacing the method which
     # normally handles them.

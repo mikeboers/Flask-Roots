@@ -30,25 +30,33 @@ class Roots(object):
         from .session import setup_session
         setup_session(app)
 
+
         self.extensions['login_manager'] = login = LoginManager(app)
         login.user_callback = lambda uid: None
 
+
         self.extensions['auth'] = AuthManager(app)
+
 
         from .mako import MakoTemplates
         self.extensions['mako'] = MakoTemplates(app)
 
+
         self.extensions['images'] = Images(app)
+
 
         self.extensions['db'] = db = SQLAlchemy(app)
         db.metadata.bind = db.engine # WTF do I need to do this for?!
 
+
         from .mail import Mail
         self.extensions['mail'] = Mail(app)
+
 
         from .routing import setup_routing
         setup_routing(app)
 
+        # DONE TO HERE
+
         from .errors import setup_errors
         setup_errors(app)
-

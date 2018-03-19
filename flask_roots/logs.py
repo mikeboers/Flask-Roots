@@ -10,11 +10,12 @@ from urllib import quote
 
 from flask import request, g
 
+from .core import define_root
 
-http_access_logger = logging.getLogger('http.access')
 
 
-def setup_logs(app):
+@define_root(stage='init')
+def init_log_request_counter(app):
 
     _request_counter = itertools.count(1)
     @app.before_request
@@ -22,6 +23,13 @@ def setup_logs(app):
         g.log_request_counter = next(_request_counter)
         g.log_start_time = time.time()
 
+
+
+@define_root(requires=['log_request_counter'])
+def init_http_access_log(app):
+
+    log_name = app.config.get('HTTP_ACCESS_LOG_NAME', 'http.access')
+    log = logging.getLogger(log_name)
 
     @app.after_request
     def log_request(response):
@@ -40,7 +48,7 @@ def setup_logs(app):
         if request.referrer:
             meta['referrer'] = request.referrer # Does this need quoting?
 
-        http_access_logger.info('%(method)s %(path)s -> %(status)s in %(duration).1fms' % {
+        log.info('%(method)s %(path)s -> %(status)s in %(duration).1fms' % {
             'method': request.method,
             'path': quote(request.path.encode('utf8')),
             'status': response.status_code,
@@ -50,49 +58,6 @@ def setup_logs(app):
         return response
 
 
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG if app.debug else logging.INFO)
-    injector = RequestContextInjector()
-    formatter = logging.Formatter('%(asctime)s %(levelname)-8s pid:%(pid)d req:%(request_counter)d ip:%(remote_addr)s %(name)s - %(message)s')
-
-
-    def add_handler(handler):
-        handler.addFilter(injector)
-        handler.setFormatter(formatter)
-        root.addHandler(handler)
-
-
-    # Main file logging.
-    log_dir = os.path.join(app.instance_path, 'log', 'python')
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    add_handler(PatternedFileHandler(os.path.join(log_dir, '{datetime}.{pid}.log')))
-
-
-    # Debugging.
-    if app.debug:
-        add_handler(logging.StreamHandler(sys.stderr))
-
-    # Production.
-    else:
-        mail_handler = logging.handlers.SMTPHandler(
-            '127.0.0.1',
-            app.config['DEFAULT_MAIL_SENDER'],
-            app.config['ADMINS'],
-            'Website Error',
-        )
-        mail_handler.setLevel(logging.ERROR)
-        add_handler(mail_handler)
-
-
-
-class PatternedFileHandler(logging.FileHandler):
-    def _open(self):
-        file_path = self.baseFilename.format(
-            datetime=datetime.datetime.utcnow().strftime('%Y-%m-%d.%H-%M-%S'),
-            pid = os.getpid(),
-        )
-        return open(file_path, 'wb')
 
 
 class RequestContextInjector(logging.Filter):
@@ -108,4 +73,63 @@ class RequestContextInjector(logging.Filter):
             record.remote_addr = None
             record.request_counter = 0
         return True
+
+
+@define_root(requires=['log_request_counter'], stage='finalize')
+def init_log_format(app):
+
+    format_ = app.config.get('LOG_FORMAT', '%(asctime)s %(levelname)-8s pid:%(pid)d req:%(request_counter)d ip:%(remote_addr)s %(name)s - %(message)s')
+
+    root = logging.getLogger()
+
+    root.setLevel(logging.DEBUG if app.debug else logging.INFO)
+
+    # Add our injector and filter to everything that doesn't already have it.
+    injector = RequestContextInjector()
+    formatter = logging.Formatter()
+    for handler in root.handlers:
+        if handler.formatter is None:
+            handler.formatter = formatter
+        if handler.addFilter(injector)
+
+
+
+
+class PatternedFileHandler(logging.FileHandler):
+    def _open(self):
+        file_path = self.baseFilename.format(
+            datetime=datetime.datetime.utcnow().strftime('%Y-%m-%d.%H-%M-%S'),
+            pid = os.getpid(),
+        )
+        return open(file_path, 'wb')
+
+
+def init_log_files(app):
+
+    log_dir = app.config.get('LOG_FILE_DIRECTORY', os.path.join(app.instance_path, 'log', 'python'))
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    name_pattern = app.config.get('LOG_FILE_PATTERN', '{datetime}.{pid}.log')
+    logging.getLogger(None).add_handler(PatternedFileHandler(os.path.join(log_dir, name_pattern)))
+
+
+
+def init_log_mail(app):
+
+    if app.debug:
+        return
+
+    mail_handler = logging.handlers.SMTPHandler(
+        '127.0.0.1',
+        app.config['DEFAULT_MAIL_SENDER'],
+        app.config['ADMINS'],
+        'Website Error',
+    )
+    mail_handler.setLevel(logging.ERROR)
+    logging.getLogger(None).add_handler(mail_handler)
+
+
+
+
 

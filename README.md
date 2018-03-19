@@ -1,12 +1,66 @@
 Flask-Roots
 ===========
 
-> Root: (noun) The part of a plant that attaches it to the ground or to a support, conveying water and nourishment to the rest of the plant.
+Flask Roots weaves together the various extensions that are the core of your app:
 
-A collection of shell scripts and the core of a Flask application to support the common elements of many web apps.
+```
+app = flask_roots.build_app(__name__, includes=['etc_config', 'log_files'])
+```
 
-Specifically, this is designed for my own sites, and may be of little use to outsiders.
+Roots looks for the requested features in ``flask_roots`` entrypoints, linearizes
+their self-described depedencies, and runs them.
 
+Roots also comes with a few common extensions for the authors projects.
+
+
+Warning to self
+---------------
+
+Flask roots used to manage the environment of the projects, including wrappers
+for `bower`, `gem`, and `npm` so they would be a part of the virtualenv. It no
+longer does this.
+
+Flask roots also used to default to a fixed number of extensions. It no longer
+does. For the behaviour when this change was made, build your app like:
+
+```
+app = flask_roots.build_app(__name__, include='''
+
+    backcompat_instance_path
+
+    environ_config
+    etc_config
+
+    init_backcompat_blank_static
+    multi_static
+
+    log_format
+    log_files
+    log_mail
+
+    signed_session
+    
+    login
+    acl
+    mako
+    images
+    sqlalchemy
+    mail
+
+    route_re
+    route_name
+
+    error_templates
+
+''')
+globals().update(app.roots)
+
+```
+
+
+**WARNING: Everything below this line is before the major refactor.**
+
+---
 
 What Flask-Roots (Will) Provide
 -------------------------------
