@@ -15,12 +15,13 @@ setup(
     entry_points={
         'flask_roots': '''
 
-            backcompat_instance_path = flask_roots.backcompat.init_instance_path
-
+            instance_path = flask_roots.app.init_instance_path
+            secret_key = flask_roots.app.init_secret_key
+            
             environ_config = flask_roots.config:init_environ_config
             etc_config = flask_roots.config:init_etc_config
 
-            backcompat_blank_static = flask_roots.static:init_backcompat_blank_static
+            blank_static = flask_roots.static:init_blank_static
             multi_static = flask_roots.static:init_multi_static
 
             log_request_counter = flask_roots.logs:init_log_request_counter
