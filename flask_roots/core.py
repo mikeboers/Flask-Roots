@@ -1,6 +1,6 @@
 import functools
 import sys
-
+import re
 import c3linearize
 import flask
 
@@ -24,6 +24,7 @@ def build_app(app_name, include, instance_path=None,
         app.config.update(config)
 
     if isinstance(include, basestring):
+        include = re.sub(r'#.*?$', '', include, re.MULTILINE)
         include = include.strip().split()
     else:
         include = list(include)

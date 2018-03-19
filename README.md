@@ -26,12 +26,12 @@ does. For the behaviour when this change was made, build your app like:
 ```
 app = flask_roots.build_app(__name__, include='''
 
-    backcompat_instance_path
-
+    instance_path
+    secret_key
     environ_config
     etc_config
 
-    init_backcompat_blank_static
+    blank_static
     multi_static
 
     log_format
