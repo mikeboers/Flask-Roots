@@ -1,4 +1,16 @@
 
+
+- Replace app.jinja_env so that `ctx.app.jinja_env.get_or_select_template` and `ctx.app.jinja_env.from_string`
+  calls in Flask's `render_template` can be return Mako templates.
+
+  There is a app.create_jinja_environment used to instance
+  app.jinja_environment (class). If we subclass Environment, we could extend
+  it to replace the two functions above.
+
+
+---
+
+
 - `manage install` to setup service and nginx
   - INSTANCE_ID in etc/flask
 

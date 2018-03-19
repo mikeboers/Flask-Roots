@@ -56,6 +56,6 @@ class ItsdangerousSessionInterface(SessionInterface):
                             domain=domain)
 
 
-def setup_session(app):
+def init_signed_session(app):
     app.session_interface = ItsdangerousSessionInterface()
 

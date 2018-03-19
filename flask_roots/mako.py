@@ -17,6 +17,11 @@ from markupsafe import Markup
 from .markdown import markdown
 
 
+def init_mako(app):
+    mako = MakoTemplates(app)
+    app.roots['mako'] = mako
+
+
 def unicode_safe(x):
     return x if isinstance(x, Markup) else unicode(x)
 
