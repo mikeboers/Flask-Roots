@@ -15,10 +15,12 @@ import haml
 from markupsafe import Markup
 
 from .markdown import markdown
+from .utils import makedirs
 
 
 def init_mako(app):
     mako = MakoTemplates(app)
+    makedirs(app.config.setdefault('MAKO_MODULE_DIRECTORY', os.path.join(app.instance_path, 'tmp', 'mako')))
     app.roots['mako'] = mako
 
 

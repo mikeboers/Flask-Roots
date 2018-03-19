@@ -1,4 +1,4 @@
-
+from .utils import makedirs
 
 
 def init_flask_login(app):
@@ -17,7 +17,18 @@ def init_flask_acl(app):
 
 
 def init_flask_images(app):
+    
     from flask_images import Images
+    makedirs(app.config.setdefault('IMAGES_CACHE', os.path.join(app.instance_path, 'tmp', 'images')))
+    
+    paths = app.config.setdefault('IMAGES_PATH', [])
+    if not paths:
+        for name in ('assets', 'static'):
+            for root in (app.root_path, app.instance_path):
+                path = os.path.join(root, name)
+                if os.path.exists(path):
+                    paths.append(path)
+
     app.roots['images'] = Images(app)
 
 
