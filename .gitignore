@@ -1,2 +1,6 @@
 *.pyc
 *.egg-info
+
+/examples/var
+/instance
+/venv

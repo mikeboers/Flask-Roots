@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
+from urllib import quote
 import datetime
 import itertools
 import logging.handlers
 import os
+import socket
 import sys
 import time
-from urllib import quote
 
 from flask import request, g, Response
 
@@ -114,19 +115,19 @@ class RequestContextInjector(logging.Filter):
 @define_root(requires=['log_request_counter'], stage='finalize')
 def init_log_format(app):
 
-    format_ = app.config.get('LOG_FORMAT', '%(asctime)s %(levelname)-8s pid:%(pid)d req:%(request_counter)d ip:%(remote_addr)s %(name)s - %(message)s')
-
     root = logging.getLogger()
-
     root.setLevel(logging.DEBUG if app.debug else logging.INFO)
 
-    # Add our injector and filter to everything that doesn't already have it.
+    format_ = app.config.get('LOG_FORMAT', '%(asctime)s %(levelname)-8s pid:%(pid)d req:%(request_counter)d ip:%(remote_addr)s %(name)s - %(message)s')
+    formatter = logging.Formatter(format_)
+
     injector = RequestContextInjector()
-    formatter = logging.Formatter()
+
+    # Add our injector and filter to everything that doesn't already have it.
     for handler in root.handlers:
-        if handler.formatter is None:
-            handler.formatter = formatter
-        if handler.addFilter(injector)
+        if True or handler.formatter is None:
+            handler.setFormatter(formatter)
+        handler.addFilter(injector)
 
 
 
@@ -140,6 +141,10 @@ class PatternedFileHandler(logging.FileHandler):
         return open(file_path, 'wb')
 
 
+def init_log_stderr(app):
+    logging.getLogger(None).addHandler(logging.StreamHandler())
+
+
 def init_log_files(app):
 
     log_dir = app.config.get('LOG_FILE_DIRECTORY', os.path.join(app.instance_path, 'log', 'python'))
@@ -147,7 +152,7 @@ def init_log_files(app):
         os.makedirs(log_dir)
 
     name_pattern = app.config.get('LOG_FILE_PATTERN', '{datetime}.{pid}.log')
-    logging.getLogger(None).add_handler(PatternedFileHandler(os.path.join(log_dir, name_pattern)))
+    logging.getLogger(None).addHandler(PatternedFileHandler(os.path.join(log_dir, name_pattern)))
 
 
 
@@ -158,12 +163,12 @@ def init_log_mail(app):
 
     mail_handler = logging.handlers.SMTPHandler(
         '127.0.0.1',
-        app.config['DEFAULT_MAIL_SENDER'],
-        app.config['ADMINS'],
+        app.config.get('DEFAULT_MAIL_SENDER', 'flask_roots@{}'.format(socket.gethostname())),
+        app.config.get('ADMINS', ['{}@{}'.format(os.getlogin(), socket.gethostname())]),
         'Website Error',
     )
     mail_handler.setLevel(logging.ERROR)
-    logging.getLogger(None).add_handler(mail_handler)
+    logging.getLogger(None).addHandler(mail_handler)
 
 
 

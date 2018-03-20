@@ -1,5 +1,39 @@
 from distutils.core import setup
 
+extras = {
+    'mako': '''
+        Flask-Mako
+        Markdown
+        PyHAML
+    ''',
+    'sqlalchemy': '''
+        Flask-SQLAlchemy
+        sqlalchemy-migrate
+    ''',
+    'mail': '''
+        Flask-Mail
+    ''',
+    'auth': '''
+        Flask-Login
+        Flask-ACL
+    ''',
+    'serve': '''
+        gunicorn
+        gevent
+    ''',
+    'images': '''
+        pillowcase
+        Flask-Images
+    ''',
+    'manage': '''
+        Baker
+        jsmin
+        watchdog
+    ''',
+}
+extras['all'] = '\n'.join(extras.itervalues())
+
+
 setup(
     name='Flask-Roots',
     version='0.0.1',
@@ -15,8 +49,8 @@ setup(
     entry_points={
         'flask_roots': '''
 
-            instance_path = flask_roots.app.init_instance_path
-            secret_key = flask_roots.app.init_secret_key
+            instance_path = flask_roots.app:init_instance_path
+            secret_key = flask_roots.app:init_secret_key
             
             environ_config = flask_roots.config:init_environ_config
             etc_config = flask_roots.config:init_etc_config
@@ -27,6 +61,7 @@ setup(
             log_request_counter = flask_roots.logs:init_log_request_counter
             log_format = flask_roots.logs:init_log_format
             http_access_log = flask_roots.logs:init_http_access_log
+            log_stderr = flask_roots.logs:init_log_stderr
             log_files = flask_roots.logs:init_log_files
             log_mail = flask_roots.logs:init_log_mail
 
@@ -48,38 +83,9 @@ setup(
     },
 
     install_requires='''
-
-        Flask
-        c3linearize
-    
+        Flask    
     ''',
-    extras_require={
-        'backcompat': '''
-
-            Baker
-            jsmin
-            watchdog
-
-            Flask-Mako
-            Markdown
-            PyHAML
-
-            Flask-SQLAlchemy
-            sqlalchemy-migrate
-
-            Flask-Mail
-            
-            pillowcase
-            Flask-Images
-
-            Flask-Login
-            Flask-ACL
-
-            gunicorn
-            gevent
-
-        ''',
-    },
+    extras_require=extras,
 
     classifiers=[
         # 'Development Status :: 5 - Production/Stable',

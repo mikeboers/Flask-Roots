@@ -1,11 +1,13 @@
+import os
+
 from .utils import makedirs
 
 
 def init_flask_login(app):
     from flask_login import LoginManager
-    login_mananger = LoginManager(app)
-    app.roots['login_mananger'] = login_mananger # Old name.
-    app.roots['authn'] = login_mananger # New name.
+    login = LoginManager(app)
+    app.roots['login_mananger'] = login # Old name.
+    app.roots['authn'] = login # New name.
     login.user_callback = lambda uid: None # TODO: Why?
 
 
@@ -33,7 +35,7 @@ def init_flask_images(app):
 
 
 def init_flask_sqlalchemy(app):
-    from flask_sqlalchemy import sqlalchemy
+    from flask_sqlalchemy import SQLAlchemy
     app.roots['db'] = db = SQLAlchemy(app)
     db.metadata.bind = db.engine # TODO: Why?
 

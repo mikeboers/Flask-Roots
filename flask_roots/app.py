@@ -13,10 +13,11 @@ def init_instance_path(app):
 def init_secret_key(app):
 
     if app.secret_key:
-        continue
+        return
 
     secret_key_path = os.path.join(app.instance_path, 'etc', 'secret_key')
     if not os.path.exists(secret_key_path):
+        makedirs(os.path.join(app.instance_path, 'etc'))
         with open(secret_key_path, 'w') as fh:
             fh.write(os.urandom(32).encode('hex'))
 

@@ -8,7 +8,7 @@ import re
 
 
 from flask import g, current_app
-from flask.ext.mako import MakoTemplates as Base, render_template, render_template_string, render_template_def
+from flask_mako import MakoTemplates as Base, render_template, render_template_string, render_template_def
 
 import mako.template
 import haml
@@ -20,7 +20,9 @@ from .utils import makedirs
 
 def init_mako(app):
     mako = MakoTemplates(app)
-    makedirs(app.config.setdefault('MAKO_MODULE_DIRECTORY', os.path.join(app.instance_path, 'tmp', 'mako')))
+    module_dir = app.config.setdefault('MAKO_MODULE_DIRECTORY', os.path.join(app.instance_path, 'tmp', 'mako'))
+    if module_dir:
+        makedirs(module_dir)
     app.roots['mako'] = mako
 
 
@@ -56,7 +58,7 @@ class MakoTemplates(Base):
             lookup = Base.create_lookup(app)
         else:
             # Flask-Mako>=0.3
-            from flask.ext.mako import _create_lookup
+            from flask_mako import _create_lookup
             lookup = _create_lookup(app)
 
         lookup.default_filters = ['unicode_safe']

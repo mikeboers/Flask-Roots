@@ -8,8 +8,8 @@ import flask
 from .core import define_root
 
 
-@define_root(requires='multi_static')
-def init_backcompat_blank_static(app):
+@define_root(requires=['multi_static'])
+def init_blank_static(app):
     app.static_url_path = ''
 
 def init_multi_static(app):
@@ -29,7 +29,7 @@ def send_static_file(self, filename):
     # Here, we ensure get_send_file_max_age is called for Blueprints.
     cache_timeout = self.get_send_file_max_age(filename)
 
-    for dir_ in self.config['STATIC_PATHS']
+    for dir_ in self.config['STATIC_PATHS']:
         path = os.path.join(dir_, filename)
         try:
             if os.path.exists(path):

@@ -5,9 +5,10 @@ import logging
 import traceback
 
 from werkzeug.exceptions import InternalServerError, HTTPException
-from flask.ext.mako import TemplateError
-from flask.ext.roots.mako import render_template
+from flask_mako import TemplateError
 from flask import current_app
+
+from .mako import render_template
 
 
 log = logging.getLogger(__name__)

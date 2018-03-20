@@ -1,7 +1,10 @@
 import functools
 import sys
 import re
-import c3linearize
+from pprint import pprint
+
+import pkg_resources
+
 import flask
 
 
@@ -9,6 +12,7 @@ def define_root(func=None, **kwargs):
     if func is None:
         return functools.partial(define_root, **kwargs)
     func.__flask_roots_config__ = kwargs
+    return func
 
 
 def build_app(app_name, include, instance_path=None,
@@ -16,7 +20,7 @@ def build_app(app_name, include, instance_path=None,
 
     app = flask.Flask(app_name,
         instance_path=instance_path,
-        **kwargs,
+        **kwargs
     )
     app.roots = {}
     
@@ -24,21 +28,22 @@ def build_app(app_name, include, instance_path=None,
         app.config.update(config)
 
     if isinstance(include, basestring):
-        include = re.sub(r'#.*?$', '', include, re.MULTILINE)
+        include = re.sub(r'#.+?$', '\n', include, 0, re.MULTILINE | re.DOTALL)
         include = include.strip().split()
     else:
         include = list(include)
 
-    dependencies = {
+
+    roots = {
         'stage.init':     {'requires': []},
-        'stage.main':     {'requires': ['stage.init'] + include},
+        'stage.main':     {'requires': ['stage.init']},
         'stage.finalize': {'requires': ['stage.main']},
     }
 
     while include:
         
         name = include.pop(0)
-        if name in dependencies:
+        if name in roots:
             continue
 
         ep = next(pkg_resources.iter_entry_points('flask_roots', name), None)
@@ -51,29 +56,47 @@ def build_app(app_name, include, instance_path=None,
 
         # Put this root into a stage.        
         stage_name = root.setdefault('stage', 'main')
-        dependencies['stage.{}'.format(stage_name)]['requires'].append(name)
+        roots['stage.{}'.format(stage_name)]['requires'].append(name)
 
-        dependencies[name] = root
+        roots[name] = root
 
         # Load all strict dependencies.
+        for key in 'requires', 'after':
+            value = root.get(key, ())
+            if not isinstance(value, (list, tuple)):
+                raise TypeError("Flask root {} {}} is non-string.".format(name, key), value)
+        
         include.extend(root.get('requires', ()))
 
-    # Linearize the dependencies.
-    def get_bases(key):
-        root = roots[key]
-        return tuple(root.get('requires'), ()) + tuple(root.get('after', ()))
-    graph = c3linearize.build_graph(None, get_bases)
-    linear_graph = c3linearize.linearize(graph,
-        heads=['stage.init', 'stage.main', 'stage.finalize'],
-        order=False,
-    )
-
-    # Finally, apply the roots.
     seen = set()
     for stage in 'init', 'main', 'finalize':
-        for key in linear_graph['stage.{}'.format(stage)]
-            if key in seen:
+        key = 'stage.' + stage
+        stack = [key]
+        todo = {key: list(roots[key]['requires'])}
+        while stack:
+
+            key = stack[-1]
+            try:
+                next_ = todo[key].pop(0)
+            except IndexError:
+                stack.pop(-1)
+                root = roots.get(key, {})
+                func = root.get('init_app')
+                if func:
+                    func(app)
                 continue
-            seen.add(key)
-            dependencies[key]['init_app'](app)
+
+            if next_ in seen:
+                continue
+            seen.add(next_)
+
+            root = roots.get(name)
+            if not root:
+                continue
+
+            stack.append(next_)
+            requires = list(root.get('requires', ()))
+            requires.extend(root.get('after', ()))
+            todo[next_] = requires
+
     return app
