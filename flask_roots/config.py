@@ -4,7 +4,7 @@ import os
 
 def init_environ_config(app):
     # Pull from environment.
-    for k, v in os.environ.iteritems():
+    for k, v in os.environ.items():
         if k.isupper() and k.startswith('FLASK_'):
             app.config[k[6:]] = v
 
@@ -39,9 +39,9 @@ def init_etc_config(app):
 
     for path in config_files:
         config.update(helpers)
-        execfile(path, config)
+        exec(open(path).read(), config)
 
-    for k, v in config.iteritems():
+    for k, v in config.items():
         if not k.isupper():
             continue
         if k in helpers:

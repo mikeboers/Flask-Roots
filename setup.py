@@ -31,7 +31,7 @@ extras = {
         watchdog
     ''',
 }
-extras['all'] = '\n'.join(extras.itervalues())
+extras['all'] = '\n'.join(extras.values())
 
 
 setup(

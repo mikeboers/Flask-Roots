@@ -42,5 +42,5 @@ def init_flask_sqlalchemy(app):
 
 def init_flask_mail(app):
     from flask_mail import Mail
-    app.roots['main'] = Mail(app)
+    app.roots['mail'] = Mail(app)
 

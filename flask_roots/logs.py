@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
-from urllib import quote
+from urllib.parse import quote
+import base64
 import datetime
 import itertools
 import logging.handlers
@@ -15,7 +16,7 @@ from .core import define_root
 
 
 
-WHITE_PIXEL = 'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='.decode('base64')
+WHITE_PIXEL = base64.b64decode(b'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==')
 
 
 @define_root(stage='init')
@@ -76,7 +77,7 @@ def init_http_access_log(app):
         # so....
         uuid = request.cookies.get('uuid')
         if uuid is None:
-            uuid = os.urandom(8).encode('hex')
+            uuid = base64.b16encode(os.urandom(8)).decode()
             response.set_cookie('uuid', uuid, max_age=60*60*24*365*20)
 
         meta = {
@@ -90,7 +91,7 @@ def init_http_access_log(app):
             'path': quote(request.path.encode('utf8')),
             'status': response.status_code,
             'duration': 1000 * (time.time() - g.log_start_time),
-        } + ('; ' if meta else '') + ' '.join('%s=%s' % x for x in sorted(meta.iteritems())))
+        } + ('; ' if meta else '') + ' '.join('%s=%s' % x for x in sorted(meta.items())))
 
         return response
 

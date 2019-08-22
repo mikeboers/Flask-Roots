@@ -95,7 +95,7 @@ def static(file_name):
         if os.path.exists(file_path):
             mtime = os.path.getmtime(file_path)
             if file_path not in _static_etags or _static_etags[file_path][0] != mtime:
-                hash_ = hashlib.sha1(open(file_path).read()).hexdigest()[:8]
+                hash_ = hashlib.sha1(open(file_path, 'rb').read()).hexdigest()[:8]
                 _static_etags[file_path] = (mtime, hash_)
             return '/%s?e=%s' % (file_name, _static_etags[file_path][1])
 

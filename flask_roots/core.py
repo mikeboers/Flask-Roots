@@ -27,7 +27,7 @@ def build_app(app_name, include, instance_path=None,
     if config is not None:
         app.config.update(config)
 
-    if isinstance(include, basestring):
+    if isinstance(include, str):
         include = re.sub(r'#.+?$', '\n', include, 0, re.MULTILINE | re.DOTALL)
         include = include.strip().split()
     else:

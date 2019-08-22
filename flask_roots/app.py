@@ -1,4 +1,5 @@
 import os
+import base64
 
 from .core import define_root
 from .utils import makedirs
@@ -18,8 +19,8 @@ def init_secret_key(app):
     secret_key_path = os.path.join(app.instance_path, 'etc', 'secret_key')
     if not os.path.exists(secret_key_path):
         makedirs(os.path.join(app.instance_path, 'etc'))
-        with open(secret_key_path, 'w') as fh:
-            fh.write(os.urandom(32).encode('hex'))
+        with open(secret_key_path, 'wb') as fh:
+            fh.write(base64.b16encode(os.urandom(32)))
 
-    with open(secret_key_path) as fh:
+    with open(secret_key_path, 'rb') as fh:
         app.secret_key = fh.read()
