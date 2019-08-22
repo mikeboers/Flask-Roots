@@ -43,7 +43,7 @@ class MathJaxExtension(_markdown.Extension):
         _pattern = re.compile(r'\\\[(.+?)\\\]|\\\((.+?)\\\)', re.MULTILINE | re.DOTALL)
 
         def _callback(self, m):
-            return self.markdown.htmlStash.store(cgi.escape(m.group(0)), safe=True)
+            return self.markdown.htmlStash.store(cgi.escape(m.group(0)))
         
         def run(self, lines):
             """Parses the actual page"""
@@ -60,7 +60,7 @@ class MarkdownEscapeExtension(_markdown.Extension):
         _pattern = re.compile(r'<nomarkdown>(.+?)</nomarkdown>', re.MULTILINE | re.DOTALL)
 
         def _callback(self, m):
-            return self.markdown.htmlStash.store(m.group(1), safe=True)
+            return self.markdown.htmlStash.store(m.group(1))
         
         def run(self, lines):
             """Parses the actual page"""
@@ -73,7 +73,7 @@ class MarkdownEscapeExtension(_markdown.Extension):
 extension_constructors = dict(
     mathjax=MathJaxExtension,
     markdown_escape=MarkdownEscapeExtension,
-    codehilite=lambda: CodeHiliteExtension([('guess_lang', False)])
+    codehilite=lambda: CodeHiliteExtension(guess_lang=False),
 )
 
 
