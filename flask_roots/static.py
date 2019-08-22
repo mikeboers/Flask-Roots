@@ -20,16 +20,26 @@ def init_multi_static(app):
             os.path.join(app.instance_path, 'static')
         ]
 
-    app.send_static_file = send_static_file
+    # Remove the existing one.
+    app.view_functions.pop('static', None)
+
+    # Use ours.
+    # This is inspired by how the default one is registered.
+    app.add_url_rule(
+        app.static_url_path + "/<path:filename>",
+        endpoint="static",
+        host=None, # ??
+        view_func=lambda filename: send_static_file(app, filename)
+    )
 
 
-def send_static_file(self, filename):
+def send_static_file(app, filename):
 
     # Ensure get_send_file_max_age is called in all cases.
     # Here, we ensure get_send_file_max_age is called for Blueprints.
-    cache_timeout = self.get_send_file_max_age(filename)
+    cache_timeout = app.get_send_file_max_age(filename)
 
-    for dir_ in self.config['STATIC_PATHS']:
+    for dir_ in app.config['STATIC_PATHS']:
         path = os.path.join(dir_, filename)
         try:
             if os.path.exists(path):
