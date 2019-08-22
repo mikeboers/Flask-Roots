@@ -7,25 +7,15 @@ export FLASK_ROOT_PATH="$APP_ROOT"
 export FLASK_INSTANCE_PATH="$APP_ROOT/var"
 
 # Create a Python virtual environment.
-VIRTUAL_ENV="$APP_ROOT/var/venv-$(uname)-$(arch)"
+VIRTUAL_ENV="$APP_ROOT/var/venvs/$(uname)-$(arch)"
 if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
 then
-
-    # Make sure we even have virtualenv.
-    if [[ ! -e "$APP_BIN/virtualenv" ]]
-    then
-        curl -o "$APP_BIN/virtualenv" https://raw.github.com/pypa/virtualenv/master/virtualenv.py
-        chmod +x "$APP_BIN/virtualenv"
-    fi
-
-    # Create it.
-    mkdir -p "$VIRTUAL_ENV"
-    python2.7 "$APP_BIN/virtualenv" --no-site-packages --distribute "$VIRTUAL_ENV"
+    echo "creating virtualenv"
+    python3 -m venv "$VIRTUAL_ENV" || exit 2
 fi
-. "$VIRTUAL_ENV/bin/activate"
 
 # Drop into Python virtualenv.
-. "$VIRTUAL_ENV/bin/activate"
+. "$VIRTUAL_ENV/bin/activate" || exit 1
 
 
 # All variables are set below this point so that the critical ones will

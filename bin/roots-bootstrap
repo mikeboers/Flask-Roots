@@ -10,6 +10,6 @@ ROOTS_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTS_DIR="$(dirname "$ROOTS_BIN")"
 
 mkdir -p bin
-cp "$ROOTS_BIN/activate" bin/
+cp "$ROOTS_BIN/xactivate" bin/activate
 
 chmod +x bin/activate
