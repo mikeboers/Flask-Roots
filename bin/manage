@@ -92,7 +92,7 @@ def config(all=False, *args):
         print config.get(args[0])
         return
 
-    for k, v in sorted(config.iteritems()):
+    for k, v in sorted(config.items()):
         if k.startswith('_') or k.upper() != k:
             continue
         print '%s: %r' % (k, v)

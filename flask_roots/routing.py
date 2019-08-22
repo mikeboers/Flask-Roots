@@ -11,7 +11,7 @@ class RegexConverter(BaseConverter):
 
 
 def strip_accents(s):
-    s = unicode(s)
+    s = str(s)
     return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
 
 
@@ -25,7 +25,8 @@ def _urlify_name(name):
 
 
 def urlify_name(name):
-    return _urlify_name(strip_accents(name).encode('ascii', 'ignore'))
+    # The encode/decode cycle is a little silly.
+    return _urlify_name(strip_accents(name).encode('ascii', 'ignore').decode())
 
 
 class NameConverter(BaseConverter):
@@ -34,7 +35,7 @@ class NameConverter(BaseConverter):
         return value
 
     def to_url(self, value):
-        if not isinstance(value, basestring) and hasattr(value, 'name'):
+        if not isinstance(value, str) and hasattr(value, 'name'):
             value = value.name
         return urlify_name(value).lower()
 

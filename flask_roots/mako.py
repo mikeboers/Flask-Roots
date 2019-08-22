@@ -27,7 +27,7 @@ def init_mako(app):
 
 
 def unicode_safe(x):
-    return x if isinstance(x, Markup) else unicode(x)
+    return x if isinstance(x, Markup) else str(x)
 
 
 # Monkey patch for error catching!
@@ -103,8 +103,10 @@ def static(file_name):
 
 
 def fuzzy_time(d, now=None):
-    if isinstance(d, (int, long, float)):
+    
+    if isinstance(d, (int, float)):
         d = datetime.datetime.fromtimestamp(int(d))
+
     now = now or datetime.datetime.utcnow()
     diff = now - d
     s = diff.seconds + diff.days * 24 * 3600

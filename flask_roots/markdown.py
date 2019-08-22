@@ -90,15 +90,12 @@ extension_usage_defaults = dict(
 
 def markdown(text, _unknown=None, **custom_exts):
     # _unknown is for swisssol.com. It may have been nl2br.
-
-    if not isinstance(text, unicode):
-        text = unicode(str(text), 'utf8')
     
     loaded_extensions = []
     ext_prefs = extension_usage_defaults.copy()
     ext_prefs.update(current_app.config.get('MARKDOWN_EXTS', {}))
     ext_prefs.update(custom_exts)
-    for name, include in ext_prefs.iteritems():
+    for name, include in ext_prefs.items():
         if include:
             ext = extension_constructors.get(name)
             ext = ext() if ext else name
