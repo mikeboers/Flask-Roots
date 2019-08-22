@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, call
 
 
 def vcall(cmd, *args, **kwargs):
-    print ' '.join(cmd)
+    print(' '.join(cmd))
     return call(cmd, *args, **kwargs)
 
 
@@ -14,6 +14,7 @@ def vcall(cmd, *args, **kwargs):
 existing = {}
 proc = Popen(['gem', 'list'], stdout=PIPE)
 for line in proc.stdout:
+    line = line.decode()
     m = re.match(r'^(\w+)\s*\(([\d\.]+)\)$', line.strip())
     if not m:
         continue
@@ -52,6 +53,6 @@ for fh in fhs:
                 vcall(['gem', 'install', '--version', version_str, name])
 
         else:
-            print 'Unknown op in', repr(line)
+            print('Unknown op in', repr(line))
 
 

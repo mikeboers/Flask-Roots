@@ -8,4 +8,4 @@ for line in proc.stdout:
     m = re.match(r'^(\w+)\s*\(([\d\.]+)\)\s*$', line.strip())
     if not m:
         continue
-    print '%s==%s' % m.groups()
+    print('%s==%s' % m.groups())
