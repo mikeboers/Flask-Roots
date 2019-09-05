@@ -19,8 +19,8 @@ from .utils import makedirs
 
 
 def init_mako(app):
-    mako = MakoTemplates(app)
     module_dir = app.config.setdefault('MAKO_MODULE_DIRECTORY', os.path.join(app.instance_path, 'tmp', 'mako'))
+    mako = MakoTemplates(app)
     if module_dir:
         makedirs(module_dir)
     app.roots['mako'] = mako
