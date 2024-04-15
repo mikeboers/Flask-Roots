@@ -37,7 +37,7 @@ def send_static_file(app, filename):
 
     # Ensure get_send_file_max_age is called in all cases.
     # Here, we ensure get_send_file_max_age is called for Blueprints.
-    cache_timeout = app.get_send_file_max_age(filename)
+    max_age = app.get_send_file_max_age(filename)
 
     for dir_ in app.config['STATIC_PATHS']:
         path = os.path.join(dir_, filename)
@@ -47,4 +47,4 @@ def send_static_file(app, filename):
         except UnicodeError:
             flask.abort(404)
     
-    return send_from_directory(dir_, filename, cache_timeout=cache_timeout)
+    return send_from_directory(dir_, filename, max_age=max_age)
