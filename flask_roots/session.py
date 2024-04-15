@@ -32,7 +32,7 @@ class ItsdangerousSessionInterface(SessionInterface):
         s = self.get_serializer(app)
         if s is None:
             return None
-        val = request.cookies.get(app.session_cookie_name)
+        val = request.cookies.get(app.config['SESSION_COOKIE_NAME'])
         if not val:
             return self.session_class()
         max_age = app.permanent_session_lifetime.total_seconds()
@@ -46,12 +46,12 @@ class ItsdangerousSessionInterface(SessionInterface):
         domain = self.get_cookie_domain(app)
         if not session:
             if session.modified:
-                response.delete_cookie(app.session_cookie_name,
+                response.delete_cookie(app.config['SESSION_COOKIE_NAME'],
                                    domain=domain)
             return
         expires = self.get_expiration_time(app, session)
         val = self.get_serializer(app).dumps(dict(session))
-        response.set_cookie(app.session_cookie_name, val,
+        response.set_cookie(app.config['SESSION_COOKIE_NAME'], val,
                             expires=expires, httponly=True,
                             domain=domain)
 
