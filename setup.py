@@ -1,4 +1,5 @@
-from distutils.core import setup
+from setuptools import setup
+
 
 extras = {
     'mako': '''
@@ -8,7 +9,6 @@ extras = {
     ''',
     'sqlalchemy': '''
         Flask-SQLAlchemy
-        sqlalchemy-migrate
     ''',
     'mail': '''
         Flask-Mail
@@ -22,7 +22,6 @@ extras = {
         gevent
     ''',
     'images': '''
-        pillowcase
         Flask-Images
     ''',
     'manage': '''
@@ -37,7 +36,7 @@ extras['all'] = '\n'.join(extras.values())
 setup(
     name='Flask-Roots',
     version='0.0.1',
-    description='Lightweight personal git server.',
+    description="Mike's common Flask tools.",
     url='http://github.com/mikeboers/Flask-Roots',
     
     packages=['flask_roots'],
@@ -47,6 +46,13 @@ setup(
     license='BSD-3',
     
     entry_points={
+
+        'flask.commands': '''
+
+            migrate = flask_roots.cli.migrate:main
+
+        ''',
+        
         'flask_roots': '''
 
             instance_path = flask_roots.app:init_instance_path

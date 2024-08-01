@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-import datetime
-import errno
-import os
-import sys
-import urlparse
-import datetime
-import shutil
 from optparse import OptionParser
+import datetime
+import os
+import shutil
+import urllib
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, DateTime, String
-import migrate # For the monkey patching.
 
-from flask.ext.roots.config import get_config
+from flask_roots.config import get_config
 
 
 opt_parser = OptionParser()
@@ -28,7 +24,7 @@ root_path = config['ROOT_PATH']
 
 
 if not opts.no_backup:
-    split = urlparse.urlsplit(config['SQLALCHEMY_DATABASE_URI'])
+    split = urllib.parse.urlsplit(config['SQLALCHEMY_DATABASE_URI'])
     if split.scheme == 'sqlite':
         dbpath = split.path
         if dbpath.startswith('/'):
@@ -82,18 +78,18 @@ for dirpath, dirnames, filenames in os.walk(patchdir, followlinks=True):
             
             for x in engine.execute(table.select().where(table.c.name == patch_name)):
                 if opts.verbose:
-                    print patch_name
-                    print '\tapplied on', x['time'].isoformat(' ')
+                    print(patch_name)
+                    print('\tapplied on', x['time'].isoformat(' '))
                 break
             else:
                 if opts.dry_run:
-                    print patch_name
-                    print '\twould apply'
+                    print(patch_name)
+                    print('\twould apply')
                 else:
-                    print patch_name
-                    print '\tapplying...',
+                    print(patch_name)
+                    print('\tapplying...',)
 
                     patch(engine)
 
                     engine.execute(table.insert(), name=patch_name)
-                    print 'Done.'
+                    print('Done.')
