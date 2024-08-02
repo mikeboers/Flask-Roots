@@ -43,6 +43,10 @@ class NameConverter(BaseConverter):
 def init_route_re(app):
     app.url_map.converters['re'] = RegexConverter
 
+
 def init_route_name(app):
     app.url_map.converters['name'] = NameConverter
+    app.context_processor(lambda: {
+        'urlify_name': urlify_name,
+    })
 
