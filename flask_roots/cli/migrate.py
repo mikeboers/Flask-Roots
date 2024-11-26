@@ -15,6 +15,7 @@ import sqlalchemy as sa
 @click.option('--no-backup', '-B', flag_value=True, default=False)
 @flask.cli.with_appcontext
 def main(dry_run, verbose, echo, no_backup):
+    """Run Flask-Roots migrations"""
     
     sa_url = flask.current_app.config['SQLALCHEMY_DATABASE_URI']
 

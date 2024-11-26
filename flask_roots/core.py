@@ -1,7 +1,6 @@
 import functools
-import sys
+import os
 import re
-from pprint import pprint
 
 import pkg_resources
 
@@ -15,11 +14,12 @@ def define_root(func=None, **kwargs):
     return func
 
 
-def build_app(app_name, include, instance_path=None,
-    exclude=None, config=None, **kwargs):
+def build_app(app_name, include, exclude=None, config=None, **kwargs):
+
+    kwargs.setdefault('root_path', os.environ.get('FLASK_ROOT_PATH'))
+    kwargs.setdefault('instance_path', os.environ.get('FLASK_INSTANCE_PATH'))
 
     app = flask.Flask(app_name,
-        instance_path=instance_path,
         **kwargs
     )
     app.roots = {}

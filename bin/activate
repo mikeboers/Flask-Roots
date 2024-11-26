@@ -1,0 +1,29 @@
+
+if [[ ! "$FLASK_ROOT_PATH" ]]; then
+    echo "FLASK_ROOT_PATH unset; aborting"
+    return
+fi
+if [[ ! "$FLASK_INSTANCE_PATH" ]]; then
+    echo "FLASK_INSTANCE_PATH unset; aborting"
+    return
+fi
+
+
+# Create a Python virtual environment.
+VIRTUAL_ENV="$FLASK_ROOT_PATH/var/venvs/$(uname)-$(arch)"
+if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
+then
+    echo "Creating virtualenv..."
+    python3 -m venv "$VIRTUAL_ENV" || return
+fi
+
+# Drop into Python virtualenv.
+. "$VIRTUAL_ENV/bin/activate" || return
+
+
+# All variables are set below this point so that the critical ones will
+# get reset when the venv is deactivated.
+export PATH="$FLASK_ROOT_PATH/bin:$FLASK_ROOTS_DIR/bin:$PATH"
+
+# Make sure this project is directly importable, even if not installed.
+# export PYTHONPATH="$PYTHONPATH:$FLASK_ROOT_PATH"

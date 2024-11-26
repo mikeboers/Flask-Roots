@@ -7,8 +7,9 @@ from .utils import makedirs
 
 @define_root(stage='init')
 def init_instance_path(app):
-    app.instance_path = os.path.join(app.root_path, 'var')
-
+    # Doesn't do much anymore.
+    # This is handled by `build_app`.
+    pass
 
 @define_root(stage='init', after=['instance_path'])
 def init_secret_key(app):
