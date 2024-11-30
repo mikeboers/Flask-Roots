@@ -5,13 +5,21 @@ from .core import define_root
 from .utils import makedirs
 
 
-@define_root(stage='init')
+@define_root(
+    help="Deprecated; does nothing.",
+    stage='init'
+)
 def init_instance_path(app):
     # Doesn't do much anymore.
     # This is handled by `build_app`.
     pass
 
-@define_root(stage='init', after=['instance_path'])
+
+@define_root(
+    help="Creates a $INSTANCE_PATH/etc/secret_key which is loaded to Flask.secret_key",
+    stage='init',
+    after=['instance_path']
+)
 def init_secret_key(app):
 
     if app.secret_key:

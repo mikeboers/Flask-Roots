@@ -2,6 +2,10 @@ import copy
 import os
 
 
+from .core import define_root
+
+
+@define_root(help="Sets Flask.config from FLASK_ prefixed envvars.")
 def init_environ_config(app):
     # Pull from environment.
     for k, v in os.environ.items():
@@ -9,6 +13,7 @@ def init_environ_config(app):
             app.config[k[6:]] = v
 
 
+@define_root(help="Loads config from `etc/flask/*.py` relative to Flask root_path or instance_path.")
 def init_etc_config(app):
 
     root_path = app.root_path

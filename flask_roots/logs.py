@@ -29,6 +29,7 @@ def init_log_request_counter(app):
         g.log_start_time = time.time()
 
 
+@define_root
 def init_uuid_pixel(app):
     @app.route('/_uuid.gif')
     def uuid_pixel():
@@ -142,10 +143,12 @@ class PatternedFileHandler(logging.FileHandler):
         return open(file_path, 'wb')
 
 
+@define_root(help="Log to stderr")
 def init_log_stderr(app):
     logging.getLogger(None).addHandler(logging.StreamHandler())
 
 
+@define_root(help="Log to $LOG_FILE_DIRECTORY")
 def init_log_files(app):
 
     log_dir = app.config.get('LOG_FILE_DIRECTORY', os.path.join(app.instance_path, 'log', 'python'))

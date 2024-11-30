@@ -50,6 +50,7 @@ setup(
         'flask.commands': '''
 
             migrate = flask_roots.cli.migrate:main
+            roots   = flask_roots.cli.roots:main
 
         ''',
         

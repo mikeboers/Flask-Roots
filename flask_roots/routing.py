@@ -3,6 +3,8 @@ import unicodedata
 
 from werkzeug.routing import BaseConverter
 
+from .core import define_root
+
 
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
@@ -40,10 +42,12 @@ class NameConverter(BaseConverter):
         return urlify_name(value).lower()
 
 
+@define_root(help="Adds `re` route converter.")
 def init_route_re(app):
     app.url_map.converters['re'] = RegexConverter
 
 
+@define_root(help="Adds `name` route converter.")
 def init_route_name(app):
     app.url_map.converters['name'] = NameConverter
     app.context_processor(lambda: {
