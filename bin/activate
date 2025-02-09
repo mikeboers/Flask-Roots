@@ -9,21 +9,70 @@ if [[ ! "$FLASK_INSTANCE_PATH" ]]; then
 fi
 
 
-# Create a Python virtual environment.
-VIRTUAL_ENV="$FLASK_ROOT_PATH/var/venvs/$(uname)-$(arch)"
-if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
-then
-    echo "Creating virtualenv..."
-    python3 -m venv "$VIRTUAL_ENV" || return
-fi
+_activate() {
 
-# Drop into Python virtualenv.
-. "$VIRTUAL_ENV/bin/activate" || return
+    local verbose=""
+
+    usage() {
+        echo "usage: activate [-v]"
+    }
+
+    log() {
+        if [[ "$verbose" ]]; then
+            echo "$@"
+        fi
+    }
+
+    run() {
+        log "$@"
+        "$@"
+    }
+    
+    local args=("$@")
+    for opt in "$@"; do
+        case "$opt" in
+            -v)
+                verbose=1
+                ;;
+            *)
+                usage
+                return 1
+                ;;
+        esac
+    done
+
+    # Create a Python virtual environment.
+    VIRTUAL_ENV="$FLASK_ROOT_PATH/var/venvs/$(uname)-$(arch)"
+    if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
+    then
+        echo "Creating virtualenv..."
+        run python3 -m venv "$VIRTUAL_ENV" || return 2
+    fi
+
+    # Drop into Python virtualenv.
+    run source "$VIRTUAL_ENV/bin/activate" || return 3
 
 
-# All variables are set below this point so that the critical ones will
-# get reset when the venv is deactivated.
-export PATH="$FLASK_ROOT_PATH/bin:$FLASK_ROOTS_DIR/bin:$PATH"
+    # Pull in app env.
+    if [[ -f "$FLASK_ROOT_PATH/etc/env" ]]; then
+        run source "$FLASK_ROOT_PATH/etc/env" || return 4
+    fi
 
-# Make sure this project is directly importable, even if not installed.
-# export PYTHONPATH="$PYTHONPATH:$FLASK_ROOT_PATH"
+    # Pull in instance env.
+    if [[ -f "$FLASK_INSTANCE_PATH/etc/env" ]]; then
+        run source "$FLASK_INSTANCE_PATH/etc/env" || return 5
+    fi
+
+    # All variables are set below this point so that the critical ones will
+    # get reset when the venv is deactivated.
+    log 'export PATH="$FLASK_ROOT_PATH/bin:$FLASK_ROOTS_DIR/bin:$PATH"'
+    export PATH="$FLASK_ROOT_PATH/bin:$FLASK_ROOTS_DIR/bin:$PATH"
+
+    # Make sure this project is directly importable, even if not installed.
+    # export PYTHONPATH="$PYTHONPATH:$FLASK_ROOT_PATH"
+
+}
+
+_activate "$@" || return $?
+
+unset _activate
