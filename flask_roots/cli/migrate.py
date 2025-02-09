@@ -7,6 +7,8 @@ import click
 import flask
 import sqlalchemy as sa
 
+from flask_roots import migrate
+
 
 @click.command
 @click.option('--dry-run', '-n', flag_value=True, default=False)
@@ -71,7 +73,9 @@ def main(dry_run, verbose, echo, no_backup):
             basename, ext = os.path.splitext(relname)
 
             patches = []
-            namespace = dict(patch=patches.append)
+            namespace = dict(
+                patch=patches.append,
+            )
             code = compile(open(fullname).read(), fullname, 'exec')
             exec(code, namespace)
 
