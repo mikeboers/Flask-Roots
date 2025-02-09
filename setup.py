@@ -63,6 +63,7 @@ setup(
             environ_config = flask_roots.config:init_environ_config
             etc_config = flask_roots.config:init_etc_config
 
+            static = flask_roots.static:init_static
             blank_static = flask_roots.static:init_blank_static
             multi_static = flask_roots.static:init_multi_static
 

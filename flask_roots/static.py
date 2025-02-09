@@ -8,9 +8,17 @@ import flask
 from .core import define_root
 
 
-@define_root(requires=['multi_static'])
+@define_root(
+    help="Shortcut for blank_static and multi_static",
+    requires=['blank_static', 'multi_static']
+)
+def init_static(app):
+    pass
+
+
 def init_blank_static(app):
     app.static_url_path = ''
+
 
 def init_multi_static(app):
 
