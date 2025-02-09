@@ -24,9 +24,9 @@ extras = {
     'images': '''
         Flask-Images
     ''',
-    'manage': '''
-        Baker
+    'build': '''
         jsmin
+        lesscpy
         watchdog
     ''',
 }
@@ -49,6 +49,7 @@ setup(
 
         'flask.commands': '''
 
+            build   = flask_roots.cli.build:main
             migrate = flask_roots.cli.migrate:main
             roots   = flask_roots.cli.roots:main
 
