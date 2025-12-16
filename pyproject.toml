@@ -73,6 +73,8 @@ secret_key = "flask_roots.app:init_secret_key"
 environ_config = "flask_roots.config:init_environ_config"
 etc_config = "flask_roots.config:init_etc_config"
 
+proxy_fix = "flask_roots.proxy:init_proxy_fix"
+
 static = "flask_roots.static:init_static"
 blank_static = "flask_roots.static:init_blank_static"
 multi_static = "flask_roots.static:init_multi_static"
