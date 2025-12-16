@@ -79,12 +79,13 @@ multi_static = "flask_roots.static:init_multi_static"
 
 log_http_access = "flask_roots.logs:init_http_access_log"
 log_format = "flask_roots.logs:init_log_format"
-log_stderr = "flask_roots.logs:init_log_stderr"
-log_files = "flask_roots.logs:init_log_files"
-log_mail = "flask_roots.logs:init_log_mail"
 log_request_counter = "flask_roots.logs:init_log_request_counter"
 log_no_werkzeug = "flask_roots.logs:init_no_werkzeug"
 uuid_pixel = "flask_roots.logs:init_uuid_pixel"
+log_stderr = "flask_roots.logs:init_log_stderr"
+log_files = "flask_roots.logs:init_log_files"
+log_mail = "flask_roots.logs:init_log_mail"
+log_slack = "flask_roots.logs:init_log_slack"
 
 signed_session = "flask_roots.session:init_signed_session"
 

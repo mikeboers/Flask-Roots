@@ -4,6 +4,7 @@ from urllib.parse import quote
 import base64
 import datetime
 import itertools
+import json
 import logging.handlers
 import os
 import socket
@@ -180,6 +181,34 @@ def init_log_mail(app):
     logging.getLogger(None).addHandler(mail_handler)
 
 
+class SlackHandler(logging.Handler):
+
+    def __init__(self, url):
+        super().__init__()
+        self._url = url
+    
+    def emit(self, record:logging.LogRecord):
+        msg = self.format(record)
+        requests.post(self._url,
+            data=json.dumps({
+                #'text': 'FOO',
+                'blocks': [{
+                    'type': 'section',
+                    'text': {
+                        'type': 'mrkdwn',
+                        'text': f'```{msg}```'
+                    }
+                }]
+            }),
+            headers={'Content-Type': 'application/json'}
+        )
 
 
+@define_root
+def init_log_slack(app):
+    url = app.config['LOG_SLACK_WEBHOOK']
+    level = app.config.get('LOG_SLACK_LEVEL', logging.ERROR)
+    handler = SlackHandler(url)
+    handler.setLevel(level)
+    logging.getLogger(None).addHandler(handler)
 
