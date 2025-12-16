@@ -98,12 +98,13 @@ def init_http_access_log(app):
         if request.referrer:
             meta['referrer'] = request.referrer
 
-        log.info('%(method)s %(path)s -> %(status)s in %(duration).1fms' % {
+        log.info('%(method)s %(path)s%(query)s -> %(status)s in %(duration).1fms' % {
             'method': request.method,
             'path': quote(request.path.encode('utf8')),
+            'query': '?' + request.query_string.decode('ascii', 'replace') if request.query_string else '',
             'status': response.status_code,
             'duration': 1000 * (time.time() - g.log_start_time),
-        } + ('; ' if meta else '') + ' '.join('%s=%s' % x for x in sorted(meta.items())))
+        } + ('; ' if meta else '') + json.dumps(meta))
 
         return response
 
