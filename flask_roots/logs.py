@@ -83,6 +83,8 @@ def init_http_access_log(app):
     @app.after_request
     def log_request(response):
 
+        meta = {}
+
         # Get (or create) a token for the user. I call it "uuid" because I don't
         # want to set a cookie called "tracker". But you are reading this comment,
         # so....
@@ -90,12 +92,11 @@ def init_http_access_log(app):
         if uuid is None:
             uuid = base64.b16encode(os.urandom(8)).decode()
             response.set_cookie('uuid', uuid, max_age=60*60*24*365*20)
+            meta['user_agent'] = request.user_agent.string
+        meta['uuid'] = uuid
 
-        meta = {
-            'uuid': uuid,
-        }
         if request.referrer:
-            meta['referrer'] = request.referrer # Does this need quoting?
+            meta['referrer'] = request.referrer
 
         log.info('%(method)s %(path)s -> %(status)s in %(duration).1fms' % {
             'method': request.method,
