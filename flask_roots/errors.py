@@ -29,8 +29,6 @@ def init_error_templates(app):
 
         if e.code >= 500:
             log.exception(str(e))
-        else:
-            log.warning(str(e))
 
         try:
             return render_template(current_app.config['STATUS_TEMPLATE'],
