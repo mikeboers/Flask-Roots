@@ -7,9 +7,9 @@ import itertools
 import logging.handlers
 import os
 import socket
-import sys
 import time
 
+import requests
 from flask import request, g, Response
 
 from .core import define_root
@@ -17,6 +17,11 @@ from .core import define_root
 
 
 WHITE_PIXEL = base64.b64decode(b'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==')
+
+
+@define_root
+def init_no_werkzeug(app):
+    logging.getLogger('werkzeug').disabled = True
 
 
 @define_root(stage='init')
@@ -31,7 +36,11 @@ def init_log_request_counter(app):
 
 @define_root
 def init_uuid_pixel(app):
-    @app.route('/_uuid.gif')
+
+    log_name = app.config.get('LOG_NAME_UUID', 'http.uuid')
+    log = logging.getLogger(log_name)
+
+    @app.route('/uuid.gif')
     def uuid_pixel():
 
         etags = request.if_none_match.as_set()
@@ -44,10 +53,10 @@ def init_uuid_pixel(app):
         if etag and (not uuid or etag != uuid):
 
             if uuid:
-                http_access_logger.info('uuid migrated from %s to %s' % (etag, uuid))
+                log.info('uuid migrated from %s to %s' % (etag, uuid))
                 res.headers.add('Etag', uuid)
             else:
-                http_access_logger.info('uuid restored to %s' % etag)
+                log.info('uuid restored to %s' % etag)
                 res.set_cookie('uuid', etag, max_age=3600*24*365*20)
 
         if uuid and not etag:
@@ -64,10 +73,10 @@ def init_uuid_pixel(app):
         return res
 
 
-@define_root(requires=['log_request_counter'])
+@define_root(requires=['log_request_counter', 'uuid_pixel'])
 def init_http_access_log(app):
 
-    log_name = app.config.get('HTTP_ACCESS_LOG_NAME', 'http.access')
+    log_name = app.config.get('LOG_NAME_HTTP_ACCESS', 'http.access')
     log = logging.getLogger(log_name)
 
     @app.after_request
@@ -95,8 +104,6 @@ def init_http_access_log(app):
         } + ('; ' if meta else '') + ' '.join('%s=%s' % x for x in sorted(meta.items())))
 
         return response
-
-
 
 
 class RequestContextInjector(logging.Filter):
@@ -132,34 +139,32 @@ def init_log_format(app):
         handler.addFilter(injector)
 
 
-
-
 class PatternedFileHandler(logging.FileHandler):
     def _open(self):
         file_path = self.baseFilename.format(
-            datetime=datetime.datetime.utcnow().strftime('%Y-%m-%d.%H-%M-%S'),
-            pid = os.getpid(),
+            datetime=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H-%M-%S'),
+            pid=os.getpid(),
         )
         return open(file_path, 'wb')
 
 
-@define_root(help="Log to stderr")
+@define_root(help="Log to stderr", requires=['log_no_werkzeug'])
 def init_log_stderr(app):
     logging.getLogger(None).addHandler(logging.StreamHandler())
 
 
-@define_root(help="Log to $LOG_FILE_DIRECTORY")
+@define_root(help="Log to $LOG_FILE_DIRECTORY", requires=['log_no_werkzeug'])
 def init_log_files(app):
 
-    log_dir = app.config.get('LOG_FILE_DIRECTORY', os.path.join(app.instance_path, 'log', 'python'))
+    log_dir = app.config.get('LOG_FILE_DIRECTORY', os.path.join(app.instance_path, 'log', 'flask'))
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    name_pattern = app.config.get('LOG_FILE_PATTERN', '{datetime}.{pid}.log')
+    name_pattern = app.config.get('LOG_FILE_PATTERN', '{datetime},{pid}.log')
     logging.getLogger(None).addHandler(PatternedFileHandler(os.path.join(log_dir, name_pattern)))
 
 
-
+@define_root(requires=['log_no_werkzeug'])
 def init_log_mail(app):
 
     if app.debug:
